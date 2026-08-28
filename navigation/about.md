@@ -33,7 +33,7 @@ Here are some places I have lived.
 
     .image-gallery {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
         align-items: stretch;
     }
@@ -48,13 +48,13 @@ Here are some places I have lived.
 
     @media (max-width: 768px) {
         .image-gallery {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
 
     @media (max-width: 480px) {
         .image-gallery {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(1, minmax(0, 1fr));
         }
     }
 </style>
@@ -135,18 +135,14 @@ Everything for me, as for many others, revolves around family and friends i love
 - I am a very creative person and is constantly doing different crafts
 - My biggest passions are building legos, drawing, and spending time with my dog 
 
-</comment>
+
 <div class="image-gallery">
-  <img src="{{site.baseurl}}/images/about/missionary.jpg" alt="Image 1">
-  <img src="{{site.baseurl}}/images/about/john_tamara.jpg" alt="Image 2">
-  <img src="{{site.baseurl}}/images/about/tamara_fam.jpg" alt="Image 3">
-  <img src="{{site.baseurl}}/images/about/surf.jpg" alt="Image 4">
-  <img src="{{site.baseurl}}/images/about/john_lora.jpg" alt="Image 5">
-  <img src="{{site.baseurl}}/images/about/lora_fam.jpg" alt="Image 6">
-  <img src="{{site.baseurl}}/images/about/lora_fam2.jpg" alt="Image 7">
-  <img src="{{site.baseurl}}/images/about/pj_party.jpg" alt="Image 8">
-  <img src="{{site.baseurl}}/images/about/trent_family.png" alt="Image 9">
-  <img src="{{site.baseurl}}/images/about/claire.jpg" alt="Image 10">
-  <img src="{{site.baseurl}}/images/about/grandkids.jpg" alt="Image 11">
-  <img src="{{site.baseurl}}/images/about/farm.jpg" alt="Image 12">
+  <img src="{{site.baseurl}}/images/about/bsfs.png" alt="Best friends">
+  <img src="{{site.baseurl}}/images/about/cosmo.png" alt="Cosmo">
+  <img src="{{site.baseurl}}/images/about/dance.png" alt="Dance">
+  <img src="{{site.baseurl}}/images/about/draw.png" alt="Drawing">
+  <img src="{{site.baseurl}}/images/about/fam.JPG" alt="Family">
+  <img src="{{site.baseurl}}/images/about/friends.png" alt="Friends">
+  <img src="{{site.baseurl}}/images/about/sibs.png" alt="Siblings">
+  <img src="{{site.baseurl}}/images/about/swim.png" alt="Swimming">
 </div>
