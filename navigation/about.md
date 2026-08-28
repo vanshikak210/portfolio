@@ -32,16 +32,30 @@ Here are some places I have lived.
     }
 
     .image-gallery {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 10px;
-        }
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        align-items: stretch;
+    }
 
     .image-gallery img {
-        max-height: 150px;
+        width: 100%;
+        height: 220px;
         object-fit: cover;
-        border-radius: 5px;
+        border-radius: 8px;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .image-gallery {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 480px) {
+        .image-gallery {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
     }
 </style>
 
@@ -105,16 +119,22 @@ Here is what I did at those places
 - 🎓 I want to major in Cell and Molecular Biology and minor in Computer Science 
 - 💼 I hope to become a genetic engineer when I am older
 
-### Culture, Family, and Fun
+### Family
 
-Everything for me, as for many others, revolves around family and faith.
+Everything for me, as for many others, revolves around family and friends i love everyobe. 
 
-- My mother told me that I was Danish, English. and Irish, here is my researched [family tree]({{site.baseurl}}/images/about/familytree.png)
-- My family is pretty big as I have been married twice, my 1st wife passed away.  We have had 5 kids, 4 adopted by me, 1 biological.  Plus, there are three grandkids.  My name to my grandkids is Abuilito.
-- The gallery of pics has some of my family, fun, culture and faith memories.
+- I have two brothers, one older and one younger so I am the middle child!
+- I also have a dog, named cosmo. He is my best friend and he is 5 years old now. 
+- Most of my family lives in either India or London. So I don't see them often but I have a very big family. 
+- Since my mom has 5 other siblings, our family tree is very big. I have a ton of cousins, aunts and uncles. 
 
-<comment>
-Gallery of Pics, scroll to the right for more ...
+### Culture and Fun
+- I have been an avid dancer and swimmer for the past 10 years of my life 
+- I do indian classical dance, competitve swim, and have recently started running daily
+- I also have done piano since I was 4 
+- I am a very creative person and is constantly doing different crafts
+- My biggest passions are building legos, drawing, and spending time with my dog 
+
 </comment>
 <div class="image-gallery">
   <img src="{{site.baseurl}}/images/about/missionary.jpg" alt="Image 1">
