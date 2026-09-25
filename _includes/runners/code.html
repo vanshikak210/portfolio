@@ -49,7 +49,7 @@
       <span>Output</span>
       <button type="button" class="ocs__btn utility copyOutput" data-hook="copy-output" title="Copy Output" aria-label="Copy Output"></button>
     </div>
-    <div class="output-content">Click "Run" in code control panel to see output ...</div>
+    <div class="output-content">{% if include.output %}{{ include.output | escape }}{% else %}Click "Run" in code control panel to see output ...{% endif %}</div>
     <div class="control-panel">
       <span class="execTime"></span>
     </div>

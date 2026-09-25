@@ -143,6 +143,23 @@ class CodeRunner:
     code: str
     options: dict[str, Any]
     custom_cell_id: str
+    output: str = ''
+
+    @staticmethod
+    def extract_output(cell) -> str:
+        """Pull the notebook's captured stdout/result text for a cell, if any."""
+        parts = []
+        for out in cell.get('outputs', []):
+            output_type = out.get('output_type')
+            if output_type == 'stream':
+                parts.append(''.join(out.get('text', '')))
+            elif output_type in ('execute_result', 'display_data'):
+                text = out.get('data', {}).get('text/plain', '')
+                parts.append(''.join(text) if isinstance(text, list) else text)
+            elif output_type == 'error':
+                traceback = out.get('traceback', [])
+                parts.append('\n'.join(traceback))
+        return ''.join(parts).strip()
 
     @staticmethod
     def extract_challenge_and_options(cell_source: str, language: str) -> Optional[tuple[str, dict[str, Any]]]:
@@ -235,6 +252,7 @@ class CodeRunner:
             code=cls.clean_code(cell.source, language),
             options=options,
             custom_cell_id=get_custom_cell_id(cell),
+            output=cls.extract_output(cell),
         )
 
     def to_metadata(self) -> dict[str, Any]:
@@ -251,6 +269,7 @@ class CodeRunner:
             code=metadata['code'],
             options=metadata.get('options', {}),
             custom_cell_id=metadata.get('custom_cell_id', ''),
+            output=metadata.get('output', ''),
         )
 
     def liquid_lines(self, code_fence_lines: list[str], code_runner_count: int) -> list[str]:
@@ -268,6 +287,17 @@ class CodeRunner:
             '{% capture source' + str(code_runner_count) + ' %}',
             *code_fence_lines,
             '{% endcapture %}',
+        ]
+
+        if self.output:
+            lines.extend([
+                '',
+                '{% capture output' + str(code_runner_count) + ' %}',
+                self.output,
+                '{% endcapture %}',
+            ])
+
+        lines.extend([
             '',
             '{% include runners/code.html',
             '   runner_id="' + self.runner_id + '"',
@@ -275,7 +305,10 @@ class CodeRunner:
             '   challenge=challenge' + str(code_runner_count),
             '   code=code' + str(code_runner_count),
             '   source=source' + str(code_runner_count),
-        ]
+        ])
+
+        if self.output:
+            lines.append('   output=output' + str(code_runner_count))
 
         if self.options.get('autostart') or self.options.get('auto_start'):
             lines.append('   autostart="true"')
