@@ -1,5 +1,7 @@
 {% assign challenge_title = include.title | default: 'Challenge' %}
 <div class="challenge-box">
   <h3>{{ challenge_title }}</h3>
+  {% if include.challenge and include.challenge != '' %}
   <p>{{ include.challenge }}</p>
+  {% endif %}
 </div>

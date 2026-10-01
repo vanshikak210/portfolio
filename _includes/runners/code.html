@@ -4,8 +4,15 @@
   data-runner-id="{{ include.runner_id }}"
   data-default-code="{{ include.code | jsonify | escape }}"
   data-storage-key="{{ page.permalink | replace: '/', '_' }}_{{ include.runner_id }}">
-  {% capture code_runner_title %}Code Runner Challenge {% if include.challenge_number %}#{{ include.challenge_number }}{% endif %}{% endcapture %}
-  {% include runners/fragments/challenge-box.html title=code_runner_title challenge=include.challenge %}
+  {% assign runner_challenge_parts = include.challenge | split: ' - ' %}
+  {% assign runner_label = runner_challenge_parts[0] %}
+  {% if runner_challenge_parts.size > 1 %}
+    {% assign runner_desc = include.challenge | remove_first: runner_label | remove_first: ' - ' %}
+  {% else %}
+    {% assign runner_desc = '' %}
+  {% endif %}
+  {% capture code_runner_title %}{{ runner_label | default: 'Code Runner Challenge' }}{% if include.challenge_number %} #{{ include.challenge_number }}{% endif %}{% endcapture %}
+  {% include runners/fragments/challenge-box.html title=code_runner_title challenge=runner_desc %}
 
   {% if include.source %}
   <details>
