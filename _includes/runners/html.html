@@ -1,0 +1,101 @@
+<!-- Reusable HTML Runner Component -->
+<div class="ui-runner-container" id="html-runner-{{ include.runner_id }}" data-storage-key="{{ page.permalink | replace: '/', '_' }}_{{ include.runner_id }}">
+  {% include runners/fragments/challenge-box.html challenge=include.challenge %}
+
+  {% capture html_runner_top_controls %}
+      <button type="button" class="ocs__btn utility run" data-hook="run" title="Run" aria-label="Run"></button>
+      <button type="button" class="ocs__btn utility stop" data-hook="stop" title="Stop" aria-label="Stop"></button>
+      <button type="button" class="ocs__btn utility copy" data-hook="copy" title="Copy Code" aria-label="Copy Code"></button>
+      <button type="button" class="ocs__btn utility save" data-hook="save" title="Save Code" aria-label="Save Code"></button>
+      <button type="button" class="ocs__btn utility clear" data-hook="clear" title="Clear Storage" aria-label="Clear Storage"></button>
+  {% endcapture %}
+  {% capture html_runner_bottom_controls %}
+    {% include runners/fragments/editor-stats.html %}
+  {% endcapture %}
+  {% include runners/fragments/editor-container.html
+     top_controls=html_runner_top_controls
+     bottom_controls=html_runner_bottom_controls
+  %}
+
+  <div class="output-container">
+    <div class="control-panel">
+      <span>Live Preview</span>
+      <button type="button" class="ocs__btn utility reset" data-hook="reset" title="Reset" aria-label="Reset"></button>
+    </div>
+    <div class="ui-output" id="html-output-{{ include.runner_id }}"></div>
+  </div>
+</div>
+
+<script type="module">
+import { BaseRunner, HtmlExecutor } from '{{ site.baseurl }}/assets/js/pages/runners/index.js';
+
+(function() {
+  const container = document.getElementById('html-runner-{{ include.runner_id }}');
+  if (!container) return;
+
+  const defaultCode = `{{ include.code }}`.trim();
+  const autostart = "{{ include.autostart | default: 'true' }}" === "true";
+  const editorHeight = "{{ include.height }}";
+  const outputHeight = "{{ include.output_height }}";
+  const storageKey = container.dataset.storageKey;
+  const runner = new BaseRunner(container, { storageKey });
+
+  const editor = runner.initializeEditor({
+    defaultCode,
+    editorHeight,
+    fallbackCode: "<p>Write your HTML here</p>",
+    codeMirrorOptions: {
+      lineNumbers: true,
+      mode: "htmlmixed",
+      theme: "darcula",
+      indentUnit: 2,
+      tabSize: 2,
+      styleSelectedText: true
+    }
+  });
+
+  if (outputHeight) {
+    runner.applyScopedStyle(`#html-output-{{ include.runner_id }} { min-height: ${outputHeight}; max-height: ${outputHeight}; height: ${outputHeight}; }`);
+  }
+
+  const outputElement = container.querySelector('.ui-output');
+  const htmlExecutor = new HtmlExecutor({
+    editor,
+    outputElement,
+  });
+
+  runner.bindEditorButtons({
+    resetValue: defaultCode || "<p>Write your HTML here</p>",
+    onClear: () => {
+      stopExecution();
+    },
+    saveFeedback: '✔',
+    copyFeedback: '✔'
+  });
+
+  function stopExecution() {
+    htmlExecutor.stop();
+  }
+
+  container.querySelector('[data-hook="reset"]').onclick = () => {
+    stopExecution();
+  };
+
+  container.querySelector('[data-hook="stop"]').onclick = () => {
+    stopExecution();
+  };
+
+  function runCode() {
+    return htmlExecutor.run();
+  }
+
+  runner.bindButton('', runCode, 'run');
+  runner.bindShortcut(runCode);
+
+  if (autostart) {
+    setTimeout(() => {
+      runCode();
+    }, 0);
+  }
+})();
+</script>

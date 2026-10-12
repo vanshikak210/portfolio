@@ -80,6 +80,9 @@ CODE_RUNNER_PATTERNS = {
 # UI_RUNNER pattern for HTML cells
 UI_RUNNER_PATTERN = r'^<!--\s*UI_RUNNER:\s*(.+)\s*-->$'
 
+# HTML_RUNNER pattern for editable HTML/markup cells (code box + live rendered preview below)
+HTML_RUNNER_PATTERN = r'^<!--\s*HTML_RUNNER:\s*(.+)\s*-->$'
+
 # GAME_RUNNER pattern for GameEngine cells (JavaScript only)
 GAME_RUNNER_PATTERN = r'^//\s*GAME_RUNNER:\s*(.+)$'
 
@@ -475,6 +478,127 @@ class UiRunner:
 
 
 @dataclass
+class HtmlRunner:
+    challenge: str
+    runner_id: str
+    code: str
+    options: dict[str, Any]
+    custom_cell_id: str
+
+    @staticmethod
+    def extract_challenge_and_options(cell_source: str) -> Optional[tuple[str, dict[str, Any]]]:
+        """Parse HTML_RUNNER challenge text and optional key/value options."""
+        for line in cell_source.split('\n'):
+            match = re.match(HTML_RUNNER_PATTERN, line.strip(), re.IGNORECASE)
+            if not match:
+                continue
+
+            content = match.group(1).strip()
+            if '|' not in content:
+                return (content, {})
+
+            challenge, options_str = content.split('|', 1)
+            options: dict[str, Any] = {}
+            for option in options_str.strip().split(','):
+                if ':' not in option:
+                    continue
+                key, value = option.split(':', 1)
+                key = key.strip()
+                value = value.strip().lower()
+                if value == 'true':
+                    options[key] = True
+                elif value == 'false':
+                    options[key] = False
+                else:
+                    options[key] = value
+
+            return (challenge.strip(), options)
+
+        return None
+
+    @staticmethod
+    def clean_code(cell_source: str) -> str:
+        """Remove the %%html magic and HTML_RUNNER directive, keeping the raw markup."""
+        cleaned_lines = []
+        for i, line in enumerate(cell_source.split('\n')):
+            if i == 0 and line.strip().startswith('%%html'):
+                continue
+            if line.strip().startswith('%%'):
+                continue
+            if re.match(HTML_RUNNER_PATTERN, line.strip(), re.IGNORECASE):
+                continue
+            cleaned_lines.append(line)
+
+        result = '\n'.join(cleaned_lines).rstrip()
+        while result.startswith('\n'):
+            result = result[1:]
+        return result
+
+    @classmethod
+    def from_cell(cls, cell, permalink: str, runner_index: int) -> Optional["HtmlRunner"]:
+        """Build an HtmlRunner instance when the cell is a %%html HTML_RUNNER cell."""
+        source = cell.get('source', '')
+        if not source.strip().startswith('%%html'):
+            return None
+
+        result = cls.extract_challenge_and_options(source)
+        if not result:
+            return None
+
+        challenge, options = result
+        return cls(
+            challenge=challenge,
+            runner_id=generate_runner_id(permalink, runner_index),
+            code=cls.clean_code(source),
+            options=options,
+            custom_cell_id=get_custom_cell_id(cell),
+        )
+
+    def to_metadata(self) -> dict[str, Any]:
+        """Serialize HTML runner data for notebook cell metadata storage."""
+        return asdict(self)
+
+    @classmethod
+    def from_metadata(cls, metadata: dict[str, Any]) -> "HtmlRunner":
+        """Rehydrate an HtmlRunner from previously stored metadata."""
+        return cls(
+            challenge=metadata['challenge'],
+            runner_id=metadata['runner_id'],
+            code=metadata['code'],
+            options=metadata.get('options', {}),
+            custom_cell_id=metadata.get('custom_cell_id', ''),
+        )
+
+    def liquid_lines(self, code_runner_count: int) -> list[str]:
+        """Render Jekyll Liquid captures/includes for embedding the HTML runner widget."""
+        lines = [
+            '',
+            '{% capture challenge' + str(code_runner_count) + ' %}',
+            self.challenge,
+            '{% endcapture %}',
+            '',
+            '{% capture code' + str(code_runner_count) + ' %}',
+            self.code,
+            '{% endcapture %}',
+            '',
+            '{% include runners/html.html',
+            '   runner_id="' + self.runner_id + '"',
+            '   challenge=challenge' + str(code_runner_count),
+            '   code=code' + str(code_runner_count),
+        ]
+
+        if self.options.get('height'):
+            lines.append(f'   height="{self.options["height"]}"')
+        if self.options.get('output_height'):
+            lines.append(f'   output_height="{self.options["output_height"]}"')
+        if self.options.get('autostart') is False or self.options.get('auto_start') is False:
+            lines.append('   autostart="false"')
+
+        lines.extend(['%}', ''])
+        return lines
+
+
+@dataclass
 class GameRunner:
     challenge: str
     runner_id: str
@@ -849,6 +973,9 @@ def classify_custom_cell_type(cell) -> Optional[str]:
         if CodeRunner.extract_challenge(source, language):
             return 'code_runner'
 
+        if source.strip().startswith('%%html') and HtmlRunner.extract_challenge_and_options(source):
+            return 'html_runner'
+
         if source.strip().startswith('%%html') and UiRunner.extract_description(source):
             return 'ui_runner'
 
@@ -917,6 +1044,30 @@ def process_code_runner_cells(notebook, permalink):
         
         processed_cells.append(cell)
     
+    notebook.cells = processed_cells
+    return notebook
+
+
+def process_html_runner_cells(notebook, permalink):
+    """Process notebook cells and add html-runner metadata"""
+    runner_index = 0
+    processed_cells = []
+
+    for cell in notebook.cells:
+        if cell.cell_type == 'code':
+            runner = HtmlRunner.from_cell(cell, permalink, runner_index)
+
+            if runner:
+                # Store metadata for later use
+                cell['metadata']['html_runner'] = runner.to_metadata()
+                runner_index += 1
+
+                # Clear outputs for cells with html-runner (outputs are redundant)
+                cell['outputs'] = []
+                cell['execution_count'] = None
+
+        processed_cells.append(cell)
+
     notebook.cells = processed_cells
     return notebook
 
@@ -1224,6 +1375,16 @@ def inject_code_runners(markdown, notebook, front_matter=None):
                     else:
                         result.extend(code_lines)
                     code_runner_count += 1
+                # Add html-runner if metadata exists
+                elif code_cell and 'html_runner' in code_cell.get('metadata', {}):
+                    html_runner = HtmlRunner.from_metadata(code_cell['metadata']['html_runner'])
+                    html_lines = html_runner.liquid_lines(code_runner_count)
+                    config = panel_config(html_runner.options, 'left')
+                    if config:
+                        result.extend(queue_panel_runner(config, html_lines))
+                    else:
+                        result.extend(html_lines)
+                    code_runner_count += 1
                 # Add ui-runner if metadata exists
                 elif code_cell and 'ui_runner' in code_cell.get('metadata', {}):
                     ui_runner = UiRunner.from_metadata(code_cell['metadata']['ui_runner'])
@@ -1283,6 +1444,7 @@ def process_custom_cells(notebook, permalink):
     """Main custom-cell orchestration pipeline for ID assignment and runner extraction."""
     notebook = assign_custom_cell_ids(notebook, permalink)
     notebook = process_code_runner_cells(notebook, permalink)
+    notebook = process_html_runner_cells(notebook, permalink)
     notebook = process_ui_runner_cells(notebook, permalink)
     notebook = process_game_runner_cells(notebook, permalink)
     notebook = process_pseudocode_runner_cells(notebook, permalink)
