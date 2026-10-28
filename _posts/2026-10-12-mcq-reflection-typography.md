@@ -135,6 +135,74 @@ And here is the breakdown after going back through and correcting my misses:
 
 ---
 
+## How I Executed It Through My Project
+
+### Tools and Development
+
+I set up and ran both parts of the project locally: the Jekyll site with `make` and the Flask backend in a virtual environment. Then I deployed the site on GitHub Pages and the backend on Render.
+
+| ID | Area | Self Rank | Peer | Teacher |
+|---|---|---|---|---|
+| T01 | Development Environment | 3 | 3 | — |
+| T02 | VS Code | 3 | 3 | — |
+| T03 | Git / GitHub | 3 | 3 | — |
+| T04 | Portfolio / GitHub Pages | 3 | 3 | — |
+
+### Development and Creation
+
+I built the Shoreline login, signup and survey features and connected them to my own Flask routes. I used AI to plan across the frontend, backend and deployment, and checked the results myself with logs.
+
+| ID | Area | Self Rank | Peer | Teacher |
+|---|---|---|---|---|
+| T05 | Tools & Equipment Hacks | 3 | 3 | — |
+| T06 | Portfolio / Blogging Hacks | 2 | 3 | — |
+| T07 | Theme / Style / Layout | 3 | 3 | — |
+| T08 | JavaScript / Coding Challenges | 3 | 3 | — |
+| T09 | AI Orchestration | 4 | 3 | — |
+
+### Technical Awareness and Communication
+
+I fixed errors by reading tracebacks: a missing route, a file in the wrong folder, and a missing database table.
+
+| ID | Area | Self Rank | Peer | Teacher |
+|---|---|---|---|---|
+| T10 | Tech / Cyber Growth | 4 | 2 | — |
+| T11 | Learning Through Mistakes | 4 | 2 | — |
+| T12 | Tech / Cyber Talk | 3 | 3 | — |
+
+### Core Behaviours
+
+I showed up consistently, but it was hard to do on my own. I used AI to figure out how pages for Open Coding Society work and built it off of that.
+
+| ID | Area | Self Rank | Peer | Teacher |
+|---|---|---|---|---|
+| P01 | Attendance / Tardy | 5 | 5 | — |
+| P02 | Work Habits | 3 | 5 | — |
+| P03 | Integrity | 3 | 5 | — |
+
+### Collaboration
+
+When I got stuck, I asked for help and shared the exact errors, logs and screenshots, which made problems faster to solve.
+
+| ID | Area | Self Rank | Peer | Teacher |
+|---|---|---|---|---|
+| P04 | Communication | 3 | 3 | — |
+| P05 | Help Seeking | 4 | 3 | — |
+| P06 | Mentoring / Advocacy | 2 | 3 | — |
+
+### Professional Skills
+
+I kept working until the survey was saving to the backend, even late at night. I organized the team's work into GitHub issues with clear descriptions.
+
+| ID | Area | Self Rank | Peer | Teacher |
+|---|---|---|---|---|
+| P07 | Timeliness | 3 | 3 | — |
+| P08 | Persistence | 4 | 3 | — |
+| P09 | Organization | 3 | 3 | — |
+| P10 | Engagement | 3 | 3 | — |
+
+---
+
 ## My Class vs. Exam — Steps and Reflection
 
 - **In class:** struggle to reproduce procedures from memory during live coding
